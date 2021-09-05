@@ -5,6 +5,7 @@ import com.example.dicedistributionsimulator.domain.model.Sides;
 import com.example.dicedistributionsimulator.domain.model.TotalNumberOfRolls;
 import com.example.dicedistributionsimulator.domain.port.DiceDistributionSimulationReadRepository;
 import com.example.dicedistributionsimulator.domain.port.DiceDistributionSimulatorService;
+import com.example.dicedistributionsimulator.domain.port.view.DataForRelativeDistributionCalculationView;
 import com.example.dicedistributionsimulator.domain.port.view.DiceDistributionSimulationSummaryView;
 import com.example.dicedistributionsimulator.domain.port.view.TotalNumberOfSimulationsAndRollsMadeGroupedByDiceNumberAndDiceSidesView;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import static com.example.dicedistributionsimulator.shared.RelativeDistributionCalculator.calculateInPercentage;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
@@ -37,6 +40,17 @@ class DiceDistributionSimulatorFacade {
     @Transactional(readOnly = true)
     public List<TotalNumberOfSimulationsAndRollsMadeGroupedByDiceNumberAndDiceSidesView> getSummaryGroupedByDiceNumberAndDiceSides() {
         return readRepository.getSummaryGroupedByDiceNumberAndDiceSides();
+    }
+
+    @Transactional(readOnly = true)
+    public List<RelativeDistributionComparedToTheTotalRollsForAllSimulations> getRelativeDistributionComparedToTheTotalRollsForAllSimulations(Integer numberOfDices, Integer numberOfSides) {
+        List<DataForRelativeDistributionCalculationView> dataForRelativeDistributionCalculation = readRepository.getDataForRelativeDistributionCalculation(numberOfDices, numberOfSides);
+        return dataForRelativeDistributionCalculation.stream()
+                .map(dataForRelativeDistributionCalculationView -> new RelativeDistributionComparedToTheTotalRollsForAllSimulations(
+                        dataForRelativeDistributionCalculationView.getSum(),
+                        calculateInPercentage(dataForRelativeDistributionCalculationView)
+                ))
+                .collect(Collectors.toList());
     }
 
     private RunSimulationResponse createRunSimulationResponse(DiceDistributionSimulationSummaryView simulation) {
