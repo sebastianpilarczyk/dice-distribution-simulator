@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -25,5 +26,10 @@ class DiceDistributionSimulationController {
     @GetMapping("total-numer-of-simulations-and-rolls-made")
     public List<TotalNumberOfSimulationsAndRollsMadeGroupedByDiceNumberAndDiceSidesView> findAllGroupedByDiceNumberAndDiceSide() {
         return facade.getSummaryGroupedByDiceNumberAndDiceSides();
+    }
+
+    @GetMapping("relative-distribution")
+    public List<RelativeDistributionComparedToTheTotalRollsForAllSimulations> getRelativeDistributionComparedToTheTotalRollsForAllSimulations(@RequestParam Integer numberOfDices, @RequestParam Integer numberOfSides) {
+        return facade.getRelativeDistributionComparedToTheTotalRollsForAllSimulations(numberOfDices, numberOfSides);
     }
 }
